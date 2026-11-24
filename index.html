@@ -263,6 +263,31 @@ button{touch-action:manipulation}
 .tspin img{width:min(34vw,150px);height:auto;filter:drop-shadow(0 6px 18px rgba(13,10,7,.12))}
 .tspin.on img{animation:tSpin .8s cubic-bezier(.45,.05,.25,1) both}
 @keyframes tSpin{from{transform:perspective(800px) rotateY(0)}to{transform:perspective(800px) rotateY(360deg)}}
+/* Pied de page et pages d'information */
+footer{padding:44px 0 26px}
+footer .fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}
+footer .fbrand b{display:block;color:#f6ebdb;font-style:italic;font-weight:900;text-transform:uppercase;font-size:16px;margin-bottom:10px}
+footer .fbrand p{max-width:26em;line-height:1.6}
+footer h4{color:#f6ebdb;font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+footer ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+footer a:hover{color:#f6ebdb;text-decoration:underline}
+footer .legal{grid-column:1/-1;border-top:1px solid rgba(239,230,214,.15);padding-top:18px;font-size:12px;color:#8f8372}
+#doc{padding:44px 0 72px}
+.docw{max-width:760px;margin:0 auto;padding:0 24px}
+.docw h1{font-size:clamp(28px,4.4vw,44px);font-style:italic;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:8px}
+.docw .lead{color:var(--muted);margin-bottom:30px}
+.docw h2{margin:30px 0 8px;font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brown)}
+.docw p,.docw li{font-size:15px;line-height:1.7;color:#2f261e}
+.docw p+p{margin-top:10px}
+.docw ul{margin:8px 0 0 20px}
+.docw a{text-decoration:underline;text-underline-offset:3px}
+mark.todo{background:#ecd0a8;color:#1b130d;padding:1px 6px;border-radius:2px;font-weight:600}
+@media (max-width:700px){
+  footer .fgrid{grid-template-columns:1fr 1fr;gap:28px}
+  footer .fbrand{grid-column:1/-1}
+  footer .wrap{flex-direction:initial}
+}
+
 /* Panier */
 .scrim{position:fixed;inset:0;background:rgba(13,13,13,.55);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -406,9 +431,16 @@ aside.cart.on{transform:none}
       <p>L’Art du Football rassemble des maillots d’exception, des cartes de collection et des éditions limitées pour celles et ceux qui vivent le football comme une culture. Chaque pièce est choisie avec soin, vérifiée, puis emballée pour arriver en parfait état.</p>
     </div>
   </section>
-</div><section id="pv" hidden></section><section id="cat" hidden></section></main>
+</div><section id="pv" hidden></section><section id="cat" hidden></section><section id="doc" hidden></section></main>
 
-<footer><div class="wrap"><span>© 2026 L’Art du Football</span><span>Maillots · Cartes · Collectibles</span></div></footer>
+<footer>
+  <div class="wrap fgrid">
+    <div class="fbrand"><b>L’Art du Football</b><p>Maillots, cartes de collection et éditions limitées. Pièces sélectionnées avec soin.</p></div>
+    <nav aria-label="Boutique"><h4>Boutique</h4><ul><li><a href="#categorie-maillots">Maillots</a></li><li><a href="#categorie-cartes">Cartes de collection</a></li><li><a href="#categorie-editions">Éditions limitées</a></li><li><a href="#categorie-boutique">Toute la boutique</a></li></ul></nav>
+    <nav aria-label="Informations"><h4>Informations</h4><ul><li><a href="#page-contact">Contact</a></li><li><a href="#page-livraison">Livraison et retours</a></li><li><a href="#page-cgv">Conditions de vente</a></li><li><a href="#page-mentions">Mentions légales</a></li><li><a href="#page-confidentialite">Confidentialité</a></li></ul></nav>
+    <p class="legal">© 2026 L’Art du Football. Tous droits réservés.</p>
+  </div>
+</footer>
 
 <div class="scrim" id="scrim"></div>
 <aside class="cart" id="cart" aria-label="Panier" aria-hidden="true">
@@ -472,11 +504,11 @@ function showProduct(id){
   $('#qm').onclick=()=>{q=Math.max(1,q-1);$('#qv').textContent=q};$('#qp').onclick=()=>{q=Math.min(10,q+1);$('#qv').textContent=q};
   $('#pvAdd').onclick=()=>add(id,sz,q);
   $('#pvFav').onclick=e=>{favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];store.set('adf-favs',favs);e.currentTarget.setAttribute('aria-pressed',String(favs.includes(id)));c.querySelector('.fav').setAttribute('aria-pressed',String(favs.includes(id)));toast(favs.includes(id)?'Ajouté aux favoris':'Retiré des favoris')};
-  $('#home').hidden=true;$('#cat').hidden=true;pv.hidden=false;window.scrollTo(0,0);
+  $('#home').hidden=true;$('#cat').hidden=true;$('#doc').hidden=true;pv.hidden=false;window.scrollTo(0,0);
 }
 let pendingFlash=null;
 function showHome(h){
-  document.title='L’Art du Football';$('#home').hidden=false;pv.hidden=true;$('#cat').hidden=true;
+  document.title='L’Art du Football';$('#home').hidden=false;pv.hidden=true;$('#cat').hidden=true;$('#doc').hidden=true;
   const tg=h&&document.getElementById(h);if(tg&&h!=='top')tg.scrollIntoView();else window.scrollTo(0,0);
   if(pendingFlash){flash(pendingFlash);pendingFlash=null}
 }
@@ -497,16 +529,58 @@ function showCategory(k){
   catEl.innerHTML=`<div class="cat-hero" data-k="${k}">${k==='editions'?PITCH:''}${MONOSRC?`<img class="wm" src="${MONOSRC}" alt="">`:''}<h1>${inf.t}</h1><p>${list.length} article${list.length>1?'s':''}</p></div><div class="wrap"><div class="chips" aria-label="Catégories">${chips}</div><div class="grid">${list.map(listCard).join('')}</div></div>`;
   catEl.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const s=b.parentElement.querySelector('select');add(b.dataset.a,s?s.value:'')});
   catEl.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const id=b.dataset.f;favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];store.set('adf-favs',favs);b.setAttribute('aria-pressed',String(favs.includes(id)));document.querySelector(`.card[data-id="${id}"] .fav`).setAttribute('aria-pressed',String(favs.includes(id)));toast(favs.includes(id)?'Ajouté aux favoris':'Retiré des favoris')});
-  $('#home').hidden=true;pv.hidden=true;catEl.hidden=false;window.scrollTo(0,0);
+  $('#home').hidden=true;pv.hidden=true;$('#doc').hidden=true;catEl.hidden=false;window.scrollTo(0,0);
+}
+
+const T=s=>`<mark class="todo">[À compléter : ${s}]</mark>`;
+const DOCS={
+ contact:{t:'Contact',lead:'Une question sur un article, une commande ou une livraison ? Écris-nous.',h:`
+  <h2>Nous écrire</h2><p>E-mail : ${T('adresse e-mail de la boutique')}</p><p>Instagram : ${T('nom du compte')}</p>
+  <h2>Pour une commande</h2><p>Indique ton numéro de commande et l’adresse e-mail utilisée lors de l’achat, cela nous permet de te répondre plus vite.</p>
+  <h2>Retours et échanges</h2><p>Les démarches sont expliquées sur la page <a href="#page-livraison">Livraison et retours</a>.</p>`},
+ livraison:{t:'Livraison et retours',lead:'Comment ta commande arrive chez toi, et comment la renvoyer si besoin.',h:`
+  <h2>Préparation et expédition</h2><p>Chaque commande est préparée avec soin et expédiée dans un emballage adapté à la protection des maillots et des cartes.</p>
+  <ul><li>Délai de préparation : ${T('délai')}</li><li>Transporteur : ${T('nom du transporteur')}</li><li>Pays livrés : ${T('liste des pays')}</li><li>Frais de livraison : ${T('tarifs et seuil de gratuité éventuel')}</li></ul>
+  <h2>Droit de rétractation</h2><p>Tu disposes de 14 jours à compter de la réception de ta commande pour changer d’avis, sans avoir à te justifier. L’article doit nous être renvoyé dans son état d’origine, avec son emballage et ses étiquettes.</p>
+  <p>Pour l’exercer, écris-nous via la page <a href="#page-contact">Contact</a> en indiquant ton numéro de commande. Frais de retour : ${T('à la charge de l’acheteur ou de la boutique')}.</p>
+  <h2>Remboursement</h2><p>Le remboursement intervient au plus tard 14 jours après que nous avons été informés de ta décision. Il peut être différé jusqu’à la réception des articles retournés, ou jusqu’à la preuve de leur expédition.</p>
+  <h2>Article non conforme ou abîmé</h2><p>Si ton article arrive abîmé ou ne correspond pas à la description, contacte-nous rapidement avec des photos. Tu bénéficies des garanties légales de conformité (articles L217-3 et suivants du Code de la consommation) et des vices cachés (articles 1641 et suivants du Code civil).</p>`},
+ cgv:{t:'Conditions générales de vente',lead:'Les règles qui s’appliquent à tes achats sur ce site.',h:`
+  <h2>1. Vendeur</h2><p>L’Art du Football, ${T('forme juridique, adresse, SIRET')}. Coordonnées complètes dans les <a href="#page-mentions">mentions légales</a>.</p>
+  <h2>2. Produits</h2><p>Les articles proposés sont des maillots, des cartes de collection et des éditions limitées. Les photos et les descriptions sont aussi fidèles que possible. Chaque article est vendu dans la limite des stocks disponibles.</p>
+  <h2>3. Prix</h2><p>Les prix sont indiqués en euros, toutes taxes comprises ${T('vérifier le régime de TVA applicable')}. Les frais de livraison sont indiqués avant la validation de la commande.</p>
+  <h2>4. Commande et paiement</h2><p>La commande est ferme après validation du paiement. Moyens de paiement acceptés : ${T('cartes bancaires, PayPal, etc.')}. Un e-mail de confirmation est envoyé après chaque commande.</p>
+  <h2>5. Livraison</h2><p>Les délais et les frais figurent sur la page <a href="#page-livraison">Livraison et retours</a>.</p>
+  <h2>6. Rétractation et garanties</h2><p>Le droit de rétractation de 14 jours et les garanties légales sont détaillés sur la page <a href="#page-livraison">Livraison et retours</a>.</p>
+  <h2>7. Médiation de la consommation</h2><p>En cas de litige, tu peux recourir gratuitement à un médiateur de la consommation : ${T('nom et coordonnées du médiateur')}.</p>
+  <h2>8. Droit applicable</h2><p>Les présentes conditions sont soumises au droit français.</p>`},
+ mentions:{t:'Mentions légales',lead:'Informations légales sur l’éditeur et l’hébergeur du site.',h:`
+  <h2>Éditeur du site</h2><p>L’Art du Football<br>Forme juridique : ${T('forme juridique')}<br>SIRET : ${T('numéro SIRET')}<br>Adresse : ${T('adresse')}<br>E-mail : ${T('e-mail')}</p>
+  <p>Directeur de la publication : ${T('nom')}</p>
+  <h2>Hébergement</h2><p>Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis.</p>
+  <h2>Marques et propriété intellectuelle</h2><p>Les noms, logos et marques de clubs, de fédérations et d’équipementiers visibles sur les photos ou cités sur ce site appartiennent à leurs propriétaires respectifs. Ils servent uniquement à identifier les articles vendus. L’Art du Football n’est ni affilié à ces marques ni sponsorisé par elles.</p>
+  <p>Le logo, le monogramme ADF, les textes et la mise en page du site sont la propriété de L’Art du Football.</p>`},
+ confidentialite:{t:'Confidentialité',lead:'Ce que ce site enregistre, et ce qu’il n’enregistre pas.',h:`
+  <h2>Ce que le site enregistre</h2><p>Ce site n’utilise ni cookie publicitaire ni outil de mesure d’audience. Il enregistre uniquement dans ton navigateur, sur ton appareil, le contenu de ton panier et tes favoris, pour que tu les retrouves à ta prochaine visite. Ces informations ne nous sont pas transmises.</p>
+  <h2>Données techniques</h2><p>L’hébergeur du site peut conserver des données techniques de connexion (adresse IP, type de navigateur) pour assurer le fonctionnement et la sécurité du service.</p>
+  <h2>Commandes</h2><p>Lorsque la commande en ligne sera activée, les données nécessaires au traitement de ta commande (nom, adresse, e-mail) seront utilisées pour la préparer, la livrer et la facturer. Cette page sera alors complétée.</p>
+  <h2>Tes droits</h2><p>Tu peux demander l’accès, la rectification ou l’effacement de tes données en écrivant à ${T('e-mail de contact')}. Tu peux aussi saisir la CNIL (cnil.fr) si tu estimes que tes droits ne sont pas respectés.</p>`}
+};
+function showDoc(k){
+  const d=DOCS[k],el=$('#doc');
+  document.title=d.t+' – L’Art du Football';
+  el.innerHTML=`<div class="docw"><h1>${d.t}</h1><p class="lead">${d.lead}</p>${d.h}</div>`;
+  $('#home').hidden=true;pv.hidden=true;catEl.hidden=true;el.hidden=false;window.scrollTo(0,0);
 }
 function route(){
-  const h=location.hash.slice(1),m=h.match(/^produit-([a-z0-9]+)$/),c=h.match(/^categorie-(maillots|cartes|editions|boutique)$/);
+  const h=location.hash.slice(1),m=h.match(/^produit-([a-z0-9]+)$/),c=h.match(/^categorie-(maillots|cartes|editions|boutique)$/),d=h.match(/^page-(contact|livraison|cgv|mentions|confidentialite)$/);
   if(m&&document.querySelector(`.card[data-id="${m[1]}"]`))showProduct(m[1]);
   else if(c)showCategory(c[1]);
+  else if(d)showDoc(d[1]);
   else showHome(h);
 }
 const mainEl=$('#top');
-const viewKey=()=>{const h=location.hash.slice(1);return /^(produit|categorie)-/.test(h)?h:'home'};
+const viewKey=()=>{const h=location.hash.slice(1);return /^(produit|categorie|page)-/.test(h)?h:'home'};
 let curKey=null,fadeT;
 function onNav(){
   const k=viewKey(),calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -531,7 +605,7 @@ $$('[data-go]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(
 
 /* Recherche */
 $('#search').onsubmit=e=>{e.preventDefault();$('#nouveautes').scrollIntoView({behavior:'smooth'})};
-$('#q').oninput=e=>{const v=e.target.value;if(!pv.hidden||!catEl.hidden)location.hash='nouveautes';filter(v);if(v.trim())$('#nouveautes').scrollIntoView({behavior:'smooth'})};
+$('#q').oninput=e=>{const v=e.target.value;if(!pv.hidden||!catEl.hidden||!$('#doc').hidden)location.hash='nouveautes';filter(v);if(v.trim())$('#nouveautes').scrollIntoView({behavior:'smooth'})};
 function filter(v){
   v=v.trim().toLowerCase();let n=0;
   cards.forEach(c=>{const ok=!v||c.dataset.name.toLowerCase().includes(v);c.hidden=!ok;if(ok)n++});
