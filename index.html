@@ -239,6 +239,30 @@ button{touch-action:manipulation}
 }
 @media (max-width:360px){.top nav.main a{font-size:10.5px}}
 
+/* Bandeaux de catégorie */
+#cat{padding-top:0}
+.cat-hero{position:relative;overflow:hidden;isolation:isolate;color:#f6ebdb;text-align:center;padding:clamp(44px,7vw,84px) 20px;margin-bottom:28px;animation:catIn .55s ease both}
+.cat-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to bottom,rgba(13,10,7,0) 40%,rgba(13,10,7,.55))}
+.cat-hero h1{font-size:clamp(30px,5vw,56px);font-style:italic;font-weight:900;text-transform:uppercase;letter-spacing:-.01em}
+.cat-hero p{margin-top:8px;font-size:14px;color:#d9ccb4}
+.cat-hero .wm{position:absolute;right:max(20px,calc(50% - 600px));top:50%;transform:translateY(-50%);height:clamp(60px,9vw,120px);width:auto;opacity:.1;z-index:-1}
+.cat-hero .pitch{position:absolute;inset:0;width:100%;height:100%;opacity:.14;z-index:-1}
+.cat-hero[data-k="maillots"]{background:radial-gradient(ellipse at 50% 0,rgba(139,96,66,.55),transparent 70%),repeating-linear-gradient(90deg,#1a120c 0 44px,#2b1e14 44px 88px)}
+.cat-hero[data-k="cartes"]{background:radial-gradient(circle at 50% 50%,rgba(13,10,7,.0) 0,rgba(13,10,7,.75) 85%),repeating-conic-gradient(from 0deg at 50% 50%,#4a3322 0 5deg,#130d09 5deg 10deg)}
+.cat-hero[data-k="editions"]{background:radial-gradient(ellipse at 50% 100%,rgba(139,96,66,.5),transparent 65%),#0d0a07}
+.cat-hero[data-k="boutique"]{background:radial-gradient(circle at 18% 0,rgba(255,233,189,.38),transparent 45%),radial-gradient(circle at 82% 0,rgba(255,233,189,.3),transparent 45%),linear-gradient(135deg,#0d0a07,#241911 60%,#3a2818)}
+@keyframes catIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cat-hero{animation:none}}
+
+/* Fondu entre les pages */
+#top{transition:opacity .3s ease}
+#top.fade-out{opacity:0}
+/* Logo qui tourne entre les pages */
+.tspin{position:fixed;inset:0;z-index:90;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .22s ease}
+.tspin.on{opacity:1}
+.tspin img{width:min(34vw,150px);height:auto;filter:drop-shadow(0 6px 18px rgba(13,10,7,.12))}
+.tspin.on img{animation:tSpin .8s cubic-bezier(.45,.05,.25,1) both}
+@keyframes tSpin{from{transform:perspective(800px) rotateY(0)}to{transform:perspective(800px) rotateY(360deg)}}
 /* Panier */
 .scrim{position:fixed;inset:0;background:rgba(13,13,13,.55);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -392,6 +416,7 @@ aside.cart.on{transform:none}
   <div class="lines" id="lines"></div>
   <div class="foot" id="cartFoot"></div>
 </aside>
+<div class="tspin" id="tspin" aria-hidden="true"><img alt="" src=""></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -457,6 +482,8 @@ function showHome(h){
 }
 const CATINFO={maillots:{t:'Maillots',cat:'jersey'},cartes:{t:'Cartes de collection',cat:'cards'},editions:{t:'Éditions limitées',cat:'editions'},boutique:{t:'La boutique',cat:null}};
 const catEl=$('#cat');
+const MONOSRC=(document.querySelector('#splash img')||{}).src||'';
+const PITCH='<svg class="pitch" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#efe6d6" stroke-width="2"><rect x="30" y="30" width="340" height="400"/><line x1="30" y1="230" x2="370" y2="230"/><circle cx="200" cy="230" r="56"/><rect x="110" y="30" width="180" height="70"/><rect x="110" y="360" width="180" height="70"/></g></svg>';
 function listCard(c){
   const id=c.dataset.id,fav=favs.includes(id),src=c.querySelector('img').src,sized=!!c.dataset.sizes;
   return `<article class="card" data-lid="${id}"><div class="pic"><a href="#produit-${id}" aria-label="Voir ${c.dataset.name}"><img src="${src}" alt="${c.dataset.name}"></a><button class="fav" data-f="${id}" aria-pressed="${fav}" aria-label="Ajouter aux favoris"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.2-9A5.2 5.2 0 0112 6a5.2 5.2 0 019.2 6c-2.2 4.4-9.2 9-9.2 9z"/></svg></button></div>
@@ -467,7 +494,7 @@ function showCategory(k){
   const inf=CATINFO[k],list=cards.filter(c=>!inf.cat||c.dataset.cat===inf.cat);
   document.title=inf.t+' – L’Art du Football';
   const chips=[['boutique','Tout'],['maillots','Maillots'],['cartes','Cartes'],['editions','Éditions']].map(([h,l])=>`<a class="chip" href="#categorie-${h}"${h===k?' aria-current="page"':''}>${l}</a>`).join('');
-  catEl.innerHTML=`<div class="wrap"><div class="cat-head"><h1>${inf.t}</h1><p>${list.length} article${list.length>1?'s':''}</p></div><div class="chips" aria-label="Catégories">${chips}</div><div class="grid">${list.map(listCard).join('')}</div></div>`;
+  catEl.innerHTML=`<div class="cat-hero" data-k="${k}">${k==='editions'?PITCH:''}${MONOSRC?`<img class="wm" src="${MONOSRC}" alt="">`:''}<h1>${inf.t}</h1><p>${list.length} article${list.length>1?'s':''}</p></div><div class="wrap"><div class="chips" aria-label="Catégories">${chips}</div><div class="grid">${list.map(listCard).join('')}</div></div>`;
   catEl.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const s=b.parentElement.querySelector('select');add(b.dataset.a,s?s.value:'')});
   catEl.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const id=b.dataset.f;favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];store.set('adf-favs',favs);b.setAttribute('aria-pressed',String(favs.includes(id)));document.querySelector(`.card[data-id="${id}"] .fav`).setAttribute('aria-pressed',String(favs.includes(id)));toast(favs.includes(id)?'Ajouté aux favoris':'Retiré des favoris')});
   $('#home').hidden=true;pv.hidden=true;catEl.hidden=false;window.scrollTo(0,0);
@@ -478,7 +505,20 @@ function route(){
   else if(c)showCategory(c[1]);
   else showHome(h);
 }
-addEventListener('hashchange',route);
+const mainEl=$('#top');
+const viewKey=()=>{const h=location.hash.slice(1);return /^(produit|categorie)-/.test(h)?h:'home'};
+let curKey=null,fadeT;
+function onNav(){
+  const k=viewKey(),calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(curKey!==null&&k!==curKey&&!calm){
+    clearTimeout(fadeT);mainEl.classList.add('fade-out');
+    const sp=$('#tspin');if(!sp.querySelector('img').getAttribute('src')){const lm=document.querySelector('.logo .lm');if(lm)sp.querySelector('img').src=lm.src}
+    sp.classList.remove('on');void sp.offsetWidth;sp.classList.add('on');
+    fadeT=setTimeout(()=>{route();mainEl.classList.remove('fade-out');sp.classList.remove('on')},850);
+  }else route();
+  curKey=k;
+}
+addEventListener('hashchange',onNav);
 
 /* Navigation catégories */
 function flash(cat){
@@ -519,7 +559,7 @@ function openCart(o){$('#cart').classList.toggle('on',o);$('#scrim').classList.t
 $('#cartBtn').onclick=()=>openCart(true);$('#closeCart').onclick=()=>openCart(false);$('#scrim').onclick=()=>openCart(false);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')openCart(false)});
 render();
-route();
+route();curKey=viewKey();
 $('#splash').addEventListener('animationend',e=>{if(e.animationName==='splashOut')e.currentTarget.remove()});
 </script>
 </body>
